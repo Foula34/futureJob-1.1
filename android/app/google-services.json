@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1040896015340",
+    "project_id": "future-job1",
+    "storage_bucket": "future-job1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040896015340:android:5a262ae84c37d1b9721ec9",
+        "android_client_info": {
+          "package_name": "com.domaine.futu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxzl0pVsv42ImwY3qngOCgOUF9kP-xwpg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040896015340:android:5924be3c04f5031b721ec9",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxzl0pVsv42ImwY3qngOCgOUF9kP-xwpg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
