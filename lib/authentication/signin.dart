@@ -168,7 +168,7 @@ class _SignScreenState extends State<SignScreen> {
 
                 // Bouton de connexion
                 isLoading
-                    ? Center(
+                    ? const Center(
                         child:
                             CircularProgressIndicator()) // Affichage d'un indicateur de chargement
                     : CustomButton(
