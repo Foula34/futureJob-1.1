@@ -147,6 +147,7 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
                     CustomButton(
                       text: 'Choisir un fichier',
                       onPressed: pickCV,
+                      isLoading: false,
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -169,6 +170,7 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
                     CustomButton(
                       text: 'Choisir un fichier',
                       onPressed: pickCoverLetter,
+                      isLoading: false,
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -186,6 +188,7 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
                   child: CustomButton(
                     text: 'Envoyer la candidature',
                     onPressed: _submitApplication,
+                    isLoading: false,
                   ),
                 ),
               ],

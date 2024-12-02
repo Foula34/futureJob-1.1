@@ -1,8 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:future_job/home/settings_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 import '../../models/user_model.dart';
+import '../../services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final User user;
@@ -14,6 +19,56 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  File? _image;
+
+  // Fonction pour permettre à l'utilisateur de choisir une image de profil
+  Future<void> _pickImage() async {
+    // Utilisation de file_picker pour le web
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.image);
+
+    if (result != null) {
+      setState(() {
+        _image = File(result.files.single.path!);
+      });
+
+      // Téléchargement de l'image sur Firebase Storage
+      try {
+        // Créer une référence pour le fichier dans Firebase Storage
+        String fileName = DateTime.now()
+            .millisecondsSinceEpoch
+            .toString(); // Utiliser le timestamp pour nommer l'image
+        Reference storageRef =
+            FirebaseStorage.instance.ref().child('profile_images/$fileName');
+
+        // Télécharger l'image sur Firebase Storage
+        UploadTask uploadTask = storageRef.putFile(_image!);
+
+        // Attendre que le téléchargement soit terminé
+        TaskSnapshot taskSnapshot = await uploadTask;
+
+        // Récupérer l'URL de l'image téléchargée
+        String imageUrl = await taskSnapshot.ref.getDownloadURL();
+
+        // Mettre à jour Firestore avec l'URL de l'image
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.user.id)
+            .update({
+          'profileImageUrl':
+              imageUrl, // Met à jour l'URL de l'image dans Firestore
+        });
+
+        // Mettre à jour l'URL dans l'objet utilisateur local
+        setState(() {
+          widget.user.profileImageUrl = imageUrl;
+        });
+      } catch (e) {
+        print('Erreur lors du téléchargement de l\'image: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,10 +113,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileHeader() {
     return Column(
       children: [
-        const CircleAvatar(
-          radius: 50,
-          backgroundImage: AssetImage('assets/images/me.jpg'),
-        ),
+        // Afficher l'image de profil ou une image par défaut
+        _image == null
+            ? CircleAvatar(
+                radius: 50,
+                backgroundImage: NetworkImage(
+                    widget.user.profileImageUrl.isNotEmpty
+                        ? widget.user.profileImageUrl
+                        : 'https://example.com/default-profile-image.jpg'),
+              )
+            : CircleAvatar(
+                radius: 50,
+                backgroundImage: FileImage(_image!),
+              ),
         const SizedBox(height: 16),
         Text(
           widget.user.name,
@@ -72,6 +136,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Text(
           ' ${widget.user.preferredJobType}',
           style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey[600]),
+        ),
+        // Ajouter un bouton pour changer la photo de profil
+        const SizedBox(height: 16),
+        ElevatedButton.icon(
+          onPressed: _pickImage,
+          icon: Icon(Icons.camera_alt),
+          label: Text("Changer la photo"),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.blue,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
         ),
       ],
     );
@@ -119,74 +196,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildListTile('Email', widget.user.email),
-          _buildListTile('Numéro de téléphone', widget.user.phoneNumber),
-          _buildListTile('Adresse', widget.user.address,
-              trailing: const Icon(Icons.location_on)),
           _buildListTile(
-            'Préférences de travail',
-            'Type: ${widget.user.preferredJobType}\nSecteur: ${widget.user.preferredIndustry}\nLocalisation: ${widget.user.preferredLocation}',
-          ),
-          _buildListTile('Candidatures en cours', '2 candidatures en attente',
-              trailing: const Icon(Icons.work_outline)),
-          _buildListTile(
-            'Événements et webinaires',
-            'Prochain événement : Webinaire sur le CV',
-            trailing: const Icon(Icons.event),
-            onTap: () {
-              // Naviguer vers la page des événements
-            },
-          ),
-          _buildListTile(
-            'Réseaux sociaux',
-            'LinkedIn: ${widget.user.linkedIn}\nTwitter: ${widget.user.twitter}\nInstagram: ${widget.user.instagram}',
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings, color: Colors.blue),
-            title: const Text('Paramètres',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SettingsScreen()));
-            },
-          ),
+              'Type de travail préféré', widget.user.preferredJobType),
+          _buildListTile('Secteur préféré', widget.user.preferredIndustry),
+          _buildListTile('Emplacement ', widget.user.preferredLocation),
         ],
       ),
     );
   }
 
-  Widget _buildListTile(String title, String subtitle,
-      {Icon? trailing, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          ListTile(
-            title: Text(title,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[600])),
-            trailing: trailing,
-          ),
-          const Divider(),
-        ],
-      ),
+  Widget _buildListTile(String title, String subtitle) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title:
+          Text(title, style: GoogleFonts.roboto(fontWeight: FontWeight.bold)),
+      subtitle: Text(subtitle, style: GoogleFonts.roboto(color: Colors.grey)),
     );
   }
 
   Widget _buildEditProfileButton() {
-    return ElevatedButton.icon(
+    return ElevatedButton(
       onPressed: () {
-        // Action de modification du profil
+        // Action pour éditer le profil
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => SettingsScreen()));
       },
-      icon: const Icon(Icons.edit),
-      label: const Text('Modifier le profil'),
+      child: Text("Modifier le profil"),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF4C41A3),
         foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       ),
     );
   }

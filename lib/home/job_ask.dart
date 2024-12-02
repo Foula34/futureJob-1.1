@@ -61,10 +61,10 @@ class _JobAskState extends State<JobAsk> {
               child: ListView.builder(
                 itemCount: jobs.length,
                 itemBuilder: (context, index) {
-                  final isPassed = isDatePassed(jobs[index]['date']);
+                  isDatePassed(jobs[index]['date']);
                   final statusColor = getStatusColor(jobs[index]['status']);
                   final statusIcon = getStatusIcon(jobs[index]['status']);
-                  
+
                   return Card(
                     elevation: 3,
                     margin: const EdgeInsets.symmetric(vertical: 8),
@@ -103,14 +103,17 @@ class _JobAskState extends State<JobAsk> {
                               Icon(
                                 statusIcon, // Icône pour l'état
                                 size: 16,
-                                color: statusColor, // Couleur en fonction de l'état
+                                color:
+                                    statusColor, // Couleur en fonction de l'état
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 'État: ${jobs[index]['status']}',
                                 style: TextStyle(
-                                  color: statusColor, // Couleur en fonction de l'état
-                                  fontWeight: FontWeight.bold, // Mise en gras pour l'état
+                                  color:
+                                      statusColor, // Couleur en fonction de l'état
+                                  fontWeight: FontWeight
+                                      .bold, // Mise en gras pour l'état
                                 ),
                               ),
                             ],
@@ -119,18 +122,22 @@ class _JobAskState extends State<JobAsk> {
                       ),
                       trailing: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor, // Couleur primaire du thème
+                          backgroundColor: Theme.of(context)
+                              .primaryColor, // Couleur primaire du thème
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Espacement dans le bouton
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8), // Espacement dans le bouton
                         ),
                         onPressed: () {
                           // Action à définir pour le bouton Détails
                         },
                         child: const Text(
                           'Détails',
-                          style: TextStyle(color: Colors.white), // Couleur du texte
+                          style: TextStyle(
+                              color: Colors.white), // Couleur du texte
                         ),
                       ),
                     ),

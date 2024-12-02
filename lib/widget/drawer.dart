@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:future_job/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:share_plus/share_plus.dart'; // Pour partager l'application
 
 class DrawerWidget extends StatefulWidget {
@@ -12,7 +11,8 @@ class DrawerWidget extends StatefulWidget {
 }
 
 class _DrawerWidgetState extends State<DrawerWidget> {
-  User? user;
+  final AuthService _authService = AuthService();
+
   String username = '';
   String email = '';
   String profileImageUrl = '';
@@ -20,31 +20,18 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   @override
   void initState() {
     super.initState();
-    // Récupérer l'utilisateur actuel
-    user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      _fetchUserData();
-    }
+    _fetchUserData();
   }
 
-  // Récupérer les données de l'utilisateur depuis Firestore
+  // Récupérer les données de l'utilisateur
   Future<void> _fetchUserData() async {
     try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users') // Supposons que la collection est 'users'
-          .doc(
-              user?.uid) // L'ID du document est l'UID de l'utilisateur connecté
-          .get();
-
-      if (userDoc.exists) {
+      final userData = await _authService.getUserData();
+      if (userData != null) {
         setState(() {
-          username = userDoc['userName'] ??
-              ''; // Assurez-vous que 'username' existe dans Firestore
-          email = userDoc['userEmail'] ??
-              user?.email ??
-              ''; // Utilise l'email Firebase par défaut si non présent
-          profileImageUrl = userDoc['profileImageUrl'] ??
-              ''; // URL de l'image de profil si elle existe
+          username = userData['name'] ?? '';
+          email = userData['email'] ?? '';
+          profileImageUrl = userData['profileImageUrl'] ?? '';
         });
       }
     } catch (e) {
@@ -78,7 +65,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             const SizedBox(height: 16.0),
             // Affichage du nom de l'utilisateur
             Text(
-              username.isEmpty ? 'Nom de l\'utilisateur' : username,
+              username.isEmpty ? 'Nom d\'utilisateur' : username,
               style: GoogleFonts.roboto(
                 fontWeight: FontWeight.w700,
                 fontSize: 20.0,
@@ -169,7 +156,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   // Méthode pour partager l'application
   void _shareApp() {
     final String appLink =
-        'https://example.com/download'; // Remplacez par votre lien d'application
+        'https://example.com/download'; // Lien vers l'application
     final String message = 'Découvrez cette application incroyable : $appLink';
     Share.share(message);
   }

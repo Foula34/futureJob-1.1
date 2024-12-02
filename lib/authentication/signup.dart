@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:future_job/services/auth_service.dart';
 import 'package:future_job/widget/custom_button.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Importer Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,16 +17,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
-  final AuthService _authService = AuthService(); // Instance de AuthService
-  bool isLoading = false; // Ajouter un état de chargement
+  final AuthService _authService = AuthService();
+  bool isLoading = false;
 
   void _signUp() async {
     if (_formKey.currentState!.validate()) {
+      String username = usernameController.text.trim();
       String email = emailController.text.trim();
       String password = passwordController.text.trim();
 
       setState(() {
-        isLoading = true; // Début du chargement
+        isLoading = true;
       });
 
       try {
@@ -35,36 +36,32 @@ class _LoginScreenState extends State<LoginScreen> {
             await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
 
         if (signInMethods.isNotEmpty) {
-          // Si des méthodes sont retournées, cela signifie que l'email est déjà utilisé
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Cet email est déjà utilisé')),
           );
         } else {
-          // Si l'email est disponible, on tente l'inscription
-          final user = await _authService.signUpWithEmail(email, password);
+          // Tentative d'inscription
+          final user =
+              await _authService.signUpWithEmail(email, password, username);
 
           if (user != null) {
-            // Succès de l'inscription
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Bienvenue, ${user.email}!')),
             );
-            Navigator.pushNamed(
-                context, '/home'); // Naviguer vers la page d'accueil
+            Navigator.pushNamed(context, '/home');
           } else {
-            // Échec de l'inscription
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Cette adresse email existe deja")),
+              const SnackBar(content: Text('Erreur lors de l\'inscription')),
             );
           }
         }
       } catch (e) {
-        // Si une erreur se produit, afficher un message d'erreur générique
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur : ${e.toString()}')),
         );
       } finally {
         setState(() {
-          isLoading = false; // Fin du chargement
+          isLoading = false;
         });
       }
     }
@@ -77,10 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.chevron_left,
-            color: Colors.black,
-          ),
+          icon: const Icon(Icons.chevron_left, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -95,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "S'inscrire ",
+                  "S'inscrire",
                   style: GoogleFonts.roboto(
                     fontWeight: FontWeight.w700,
                     fontSize: 30.0,
@@ -110,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 25.0),
-                // Nom d'utilisateur
                 TextFormField(
                   controller: usernameController,
                   decoration: const InputDecoration(
@@ -128,7 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 25.0),
-                // Adresse email
                 TextFormField(
                   controller: emailController,
                   decoration: const InputDecoration(
@@ -149,7 +141,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 25.0),
-                // Mot de passe
                 TextFormField(
                   controller: passwordController,
                   decoration: const InputDecoration(
@@ -172,14 +163,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 25.0),
-                // Bouton d'inscription
                 Center(
                   child: isLoading
-                      ? CircularProgressIndicator() // Affichage du chargement
+                      ? const CircularProgressIndicator()
                       : CustomButton(
                           text: "S'inscrire",
-                          onPressed:
-                              _signUp, // Appel de la méthode d'inscription
+                          onPressed: _signUp,
+                          isLoading: isLoading,
                         ),
                 ),
                 Row(
@@ -194,8 +184,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 25.0),
-
-                // Icônes de réseaux sociaux
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -220,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Vous avez déja un compte ?',
+                      'Vous avez déjà un compte ?',
                       style: GoogleFonts.roboto(
                           color: Colors.grey, fontWeight: FontWeight.w500),
                     ),

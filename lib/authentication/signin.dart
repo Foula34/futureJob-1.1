@@ -22,7 +22,7 @@ class _SignScreenState extends State<SignScreen> {
   void signIn() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        isLoading = true; // Afficher l'indicateur de chargement
+        isLoading = true;
       });
 
       String email = emailController.text;
@@ -173,7 +173,8 @@ class _SignScreenState extends State<SignScreen> {
                             CircularProgressIndicator()) // Affichage d'un indicateur de chargement
                     : CustomButton(
                         text: "Se connecter", // Texte du bouton
-                        onPressed: signIn, // Appel de la fonction signIn
+                        onPressed: signIn,
+                        isLoading: isLoading, // Appel de la fonction signIn
                       ),
                 const SizedBox(height: 25.0),
 

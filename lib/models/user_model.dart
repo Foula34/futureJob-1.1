@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class User {
   // Informations de base
   final String id;
@@ -5,18 +7,21 @@ class User {
   String email;
   String phoneNumber;
   String address;
-  
+
   // Préférences de job
   String preferredJobType; // Par exemple : CDI, CDD, Stage
   String preferredIndustry; // Par exemple : Informatique, Santé, Éducation
   String preferredLocation; // Par exemple : Conakry, Kindia, Labé
   List<String> skills; // Compétences spécifiques que l'utilisateur possède
-  
+
   // Réseaux sociaux
   String linkedIn;
   String twitter;
   String instagram;
-  
+
+  // Photo de profil
+  String profileImageUrl; // Ajout du champ pour la photo de profil
+
   // Constructeur
   User({
     required this.id,
@@ -31,24 +36,45 @@ class User {
     this.linkedIn = '',
     this.twitter = '',
     this.instagram = '',
+    this.profileImageUrl = '', // Initialisation de profileImageUrl
   });
-  
-  // Méthode pour mettre à jour les préférences
-  void updatePreferences({
-    String? jobType,
-    String? industry,
-    String? location,
-    List<String>? newSkills,
-  }) {
-    if (jobType != null) preferredJobType = jobType;
-    if (industry != null) preferredIndustry = industry;
-    if (location != null) preferredLocation = location;
-    if (newSkills != null) skills = newSkills;
+
+  // Méthode pour créer un utilisateur à partir de Firestore
+  factory User.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map;
+    return User(
+      id: doc.id,
+      name: data['name'] ?? '',
+      email: data['email'] ?? '',
+      phoneNumber: data['phoneNumber'] ?? '',
+      address: data['address'] ?? '',
+      preferredJobType: data['preferredJobType'] ?? '',
+      preferredIndustry: data['preferredIndustry'] ?? '',
+      preferredLocation: data['preferredLocation'] ?? '',
+      skills: List<String>.from(data['skills'] ?? []),
+      linkedIn: data['linkedIn'] ?? '',
+      twitter: data['twitter'] ?? '',
+      instagram: data['instagram'] ?? '',
+      profileImageUrl:
+          data['profileImageUrl'] ?? '', // Charger l'URL de la photo de profil
+    );
   }
-  
-  // Afficher les informations de l'utilisateur
-  @override
-  String toString() {
-    return 'Utilisateur: $name\nEmail: $email\nTéléphone: $phoneNumber\nAdresse: $address\nPréférences: $preferredJobType dans $preferredIndustry à $preferredLocation\nCompétences: ${skills.join(", ")}';
+
+  // Méthode pour convertir un utilisateur en Map pour Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'address': address,
+      'preferredJobType': preferredJobType,
+      'preferredIndustry': preferredIndustry,
+      'preferredLocation': preferredLocation,
+      'skills': skills,
+      'linkedIn': linkedIn,
+      'twitter': twitter,
+      'instagram': instagram,
+      'profileImageUrl': profileImageUrl, // Ajouter l'URL de la photo de profil
+    };
   }
 }
