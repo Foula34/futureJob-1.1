@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:future_job/home/job_detail_screen.dart';
 import 'package:future_job/models/job_item_model.dart';
+import 'package:future_job/home/job_detail_screen.dart';
 
 class JobCard extends StatelessWidget {
   final JobItem jobItem;
@@ -41,7 +41,14 @@ class JobCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Image.asset(jobItem.companyLogo, width: 40),
+                // Utilisation de NetworkImage pour afficher l'image depuis l'URL
+                Image.network(
+                  jobItem.companyLogo,
+                  width: 40,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.error, color: Colors.red);
+                  },
+                ),
                 const Spacer(),
                 if (jobItem.isFavorite)
                   const Icon(Icons.favorite, color: Colors.red),

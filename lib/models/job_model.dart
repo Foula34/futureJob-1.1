@@ -1,11 +1,11 @@
 class Job {
   final String companyLogo;
   final String jobTitle;
-  final String companyName; 
+  final String companyName;
   final String salary;
-  final String location; 
-  final bool isFavorite; 
-  final String employmentType; 
+  final String location;
+  final bool isFavorite;
+  final String employmentType;
 
   Job({
     required this.companyLogo,
@@ -16,4 +16,8 @@ class Job {
     this.isFavorite = false,
     this.employmentType = 'Temps Plein',
   });
+
+  get jobDescription => null;
+
+  get requirements => null;
 }

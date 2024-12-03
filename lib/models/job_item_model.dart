@@ -5,8 +5,9 @@ class JobItem {
   final String salary;
   final String location;
   final bool isFavorite;
-  final String jobDescription; 
-  final List<String> requirements; 
+  final String jobDescription;
+  final List<String> requirements;
+  final String employmentType;
 
   JobItem({
     required this.companyLogo,
@@ -16,6 +17,7 @@ class JobItem {
     this.location = '',
     this.isFavorite = false,
     this.jobDescription = '',
+    this.employmentType = 'Temps Plein',
     List<String>? requirements,
   }) : requirements = requirements ?? [];
 }

@@ -5,7 +5,6 @@ import 'package:future_job/authentication/signin.dart';
 import 'package:future_job/authentication/signup.dart';
 import 'package:future_job/authentication/welcome_screen.dart';
 import 'package:future_job/firebase_options.dart';
-import 'package:future_job/home/home_screen.dart';
 import 'package:future_job/home/job_detail_screen.dart';
 import 'package:future_job/home/notification_screen.dart';
 import 'package:future_job/home/settings_screen.dart';
@@ -13,10 +12,10 @@ import 'package:future_job/home/subscribe_job_screen.dart';
 import 'package:future_job/models/job_item_model.dart';
 import 'package:future_job/models/user_model.dart';
 import 'package:future_job/widget/drawer.dart';
+import 'package:future_job/widget/filter_bottom_sheet.dart';
 
 void main() async {
-  WidgetsFlutterBinding
-      .ensureInitialized(); // Nécessaire pour l'initialisation Firebase
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Initialisation de Firebase

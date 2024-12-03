@@ -38,7 +38,11 @@ class JobPost extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Image.asset(jobItem.companyLogo, width: 40),
+            // Utilisation de Image.network pour charger l'image depuis l'URL
+            jobItem.companyLogo.isNotEmpty
+                ? Image.network(jobItem.companyLogo, width: 40)
+                : const Icon(Icons.business,
+                    size: 40), // Icône par défaut si l'URL est vide
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -51,7 +55,7 @@ class JobPost extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Temps Plein',
+                    jobItem.employmentType, // Afficher le champ employmentType
                     style: GoogleFonts.roboto(
                       color: Colors.grey,
                     ),
