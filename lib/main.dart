@@ -27,6 +27,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Exemple d'objet JobItem
+    JobItem jobItem = JobItem(
+      jobTitle: 'Développeur Flutter',
+      companyLogo: 'https://example.com/logo.png',
+      companyName: 'TechCorp',
+      salary: '2000 €',
+      location: 'Conakry, Guinée',
+      jobDescription: 'Développer des applications Flutter...',
+      applyLink: 'recrutement@techcorp.com', // Lien email pour postuler
+    );
+
     User currentUser = User(
       name: 'Foula Fofana',
       email: 'fofanafoula70@gmail.com',
@@ -61,7 +72,9 @@ class MyApp extends StatelessWidget {
               ModalRoute.of(context)!.settings.arguments as JobItem;
           return JobDetailsPage(jobItem: jobItem);
         },
-        '/subscribe': (context) => const JobApplicationPage(),
+        '/subscribe': (context) {
+          return JobApplicationPage(jobItem: jobItem); // Passage de jobItem
+        },
       },
     );
   }

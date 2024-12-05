@@ -18,6 +18,7 @@ class JobsService {
           employmentType: doc['employmentType'] ?? '',
           salary: doc['salary'] ?? '',
           location: doc['location'] ?? '',
+          applyLink: doc['applyLink'] ?? '',
           isFavorite: doc['isFavorite'] ?? false,
           jobDescription: doc['jobDescription'] ?? '',
           requirements: List<String>.from(doc['requirements'] ?? []),

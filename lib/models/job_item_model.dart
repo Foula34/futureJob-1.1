@@ -19,5 +19,8 @@ class JobItem {
     this.jobDescription = '',
     this.employmentType = 'Temps Plein',
     List<String>? requirements,
+    String applyLink = "fofanafoula70@gmail.com",
   }) : requirements = requirements ?? [];
+
+  get applyLink => null;
 }

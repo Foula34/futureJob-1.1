@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:future_job/models/job_item_model.dart';
 import 'package:future_job/widget/custom_button.dart';
 
 class JobApplicationPage extends StatefulWidget {
-  const JobApplicationPage({super.key});
+  final JobItem jobItem; // JobItem en paramètre
+
+  const JobApplicationPage({super.key, required this.jobItem});
 
   @override
   _JobApplicationPageState createState() => _JobApplicationPageState();
@@ -49,12 +53,23 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
     }
   }
 
-  // Fonction pour soumettre le formulaire
-  void _submitApplication() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Candidature envoyée avec succès')),
-      );
+  // Fonction pour ouvrir l'email avec les champs pré-remplis
+  void _openEmailClient() async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: widget.jobItem.applyLink, // Email auquel envoyer la candidature
+      query: Uri.encodeQueryComponent(
+        'subject=Application pour le poste ${widget.jobItem.jobTitle}&body=Nom: ${nameController.text}\nEmail: ${emailController.text}\nTéléphone: ${phoneController.text}\n\nCV: ${selectedCV ?? 'Aucun CV'}\nLettre de motivation: ${selectedCoverLetter ?? 'Aucune lettre'}',
+      ),
+    );
+
+    // ignore: deprecated_member_use
+    if (await canLaunch(emailUri.toString())) {
+      // ignore: deprecated_member_use
+      await launch(emailUri.toString());
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Impossible d\'ouvrir l\'application mail')));
     }
   }
 
@@ -66,7 +81,6 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
-            Navigator.pushNamed(context, '/home');
           },
         ),
         title: const Text('Postuler pour le poste'),
@@ -186,8 +200,9 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
                 const SizedBox(height: 24),
                 Center(
                   child: CustomButton(
-                    text: 'Envoyer la candidature',
-                    onPressed: _submitApplication,
+                    text: 'Postuler',
+                    onPressed:
+                        _openEmailClient, // Ouvrir Gmail avec les champs pré-remplis
                     isLoading: false,
                   ),
                 ),

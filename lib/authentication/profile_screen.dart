@@ -7,21 +7,42 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 import '../../models/user_model.dart';
-import '../../services/auth_service.dart';
+import '../../services/auth_service.dart'; // Assurez-vous que le chemin d'importation est correct.
 
 class ProfileScreen extends StatefulWidget {
-  final User user;
-
-  const ProfileScreen({super.key, required this.user});
+  const ProfileScreen({super.key, required User user});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  User? _currentUser;
+  Map<String, dynamic>? _userData;
   File? _image;
 
-  // Fonction pour permettre à l'utilisateur de choisir une image de profil
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      // Récupérer les données de l'utilisateur actif via AuthService
+      Map<String, dynamic>? userData = await AuthService().getUserData();
+
+      if (userData != null) {
+        setState(() {
+          _userData = userData;
+          _currentUser = AuthService().getCurrentUser() as User?;
+        });
+      }
+    } catch (e) {
+      print('Erreur lors de la récupération des données utilisateur: $e');
+    }
+  }
+
   Future<void> _pickImage() async {
     // Utilisation de file_picker pour le web
     FilePickerResult? result =
@@ -32,36 +53,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _image = File(result.files.single.path!);
       });
 
-      // Téléchargement de l'image sur Firebase Storage
       try {
-        // Créer une référence pour le fichier dans Firebase Storage
         String fileName = DateTime.now()
             .millisecondsSinceEpoch
             .toString(); // Utiliser le timestamp pour nommer l'image
         Reference storageRef =
             FirebaseStorage.instance.ref().child('profile_images/$fileName');
 
-        // Télécharger l'image sur Firebase Storage
         UploadTask uploadTask = storageRef.putFile(_image!);
-
-        // Attendre que le téléchargement soit terminé
         TaskSnapshot taskSnapshot = await uploadTask;
 
-        // Récupérer l'URL de l'image téléchargée
         String imageUrl = await taskSnapshot.ref.getDownloadURL();
 
-        // Mettre à jour Firestore avec l'URL de l'image
         await FirebaseFirestore.instance
             .collection('users')
-            .doc(widget.user.id)
+            .doc(_currentUser!.id)
             .update({
-          'profileImageUrl':
-              imageUrl, // Met à jour l'URL de l'image dans Firestore
+          'profileImageUrl': imageUrl,
         });
 
-        // Mettre à jour l'URL dans l'objet utilisateur local
         setState(() {
-          widget.user.profileImageUrl = imageUrl;
+          _userData!['profileImageUrl'] = imageUrl;
         });
       } catch (e) {
         print('Erreur lors du téléchargement de l\'image: $e');
@@ -71,6 +83,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_userData == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -84,7 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         backgroundColor: Colors.white,
-        elevation: 2, // Légère ombre pour plus de profondeur
+        elevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -113,13 +129,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileHeader() {
     return Column(
       children: [
-        // Afficher l'image de profil ou une image par défaut
         _image == null
             ? CircleAvatar(
                 radius: 50,
                 backgroundImage: NetworkImage(
-                    widget.user.profileImageUrl.isNotEmpty
-                        ? widget.user.profileImageUrl
+                    _userData!['profileImageUrl'].isNotEmpty
+                        ? _userData!['profileImageUrl']
                         : 'https://example.com/default-profile-image.jpg'),
               )
             : CircleAvatar(
@@ -128,16 +143,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
         const SizedBox(height: 16),
         Text(
-          widget.user.name,
+          _userData!['name'],
           style: GoogleFonts.roboto(
               fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         const SizedBox(height: 4),
         Text(
-          ' ${widget.user.preferredJobType}',
+          _userData!['preferredJobType'],
           style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey[600]),
         ),
-        // Ajouter un bouton pour changer la photo de profil
         const SizedBox(height: 16),
         ElevatedButton.icon(
           onPressed: _pickImage,
@@ -172,8 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return IconButton(
       icon: Icon(icon, color: Colors.blue),
       onPressed: onPressed,
-      tooltip:
-          'Action ${icon.toString()}', // Ajout d'un tooltip pour plus d'information
+      tooltip: 'Action ${icon.toString()}',
     );
   }
 
@@ -188,18 +201,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: const Offset(0, 3), // changes position of shadow
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildListTile('Email', widget.user.email),
+          _buildListTile('Email', _userData!['email']),
           _buildListTile(
-              'Type de travail préféré', widget.user.preferredJobType),
-          _buildListTile('Secteur préféré', widget.user.preferredIndustry),
-          _buildListTile('Emplacement ', widget.user.preferredLocation),
+              'Type de travail préféré', _userData!['preferredJobType']),
+          _buildListTile('Secteur préféré', _userData!['preferredIndustry']),
+          _buildListTile('Emplacement', _userData!['preferredLocation']),
         ],
       ),
     );
