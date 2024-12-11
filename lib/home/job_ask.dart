@@ -122,18 +122,14 @@ class _JobAskState extends State<JobAsk> {
                       ),
                       trailing: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context)
-                              .primaryColor, // Couleur primaire du thème
+                          backgroundColor: Theme.of(context).primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8), // Espacement dans le bouton
+                              horizontal: 12, vertical: 8),
                         ),
-                        onPressed: () {
-                          // Action à définir pour le bouton Détails
-                        },
+                        onPressed: () {},
                         child: const Text(
                           'Détails',
                           style: TextStyle(

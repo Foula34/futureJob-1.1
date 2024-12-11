@@ -57,19 +57,27 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
   void _openEmailClient() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: widget.jobItem.applyLink, // Email auquel envoyer la candidature
-      query: Uri.encodeQueryComponent(
-        'subject=Application pour le poste ${widget.jobItem.jobTitle}&body=Nom: ${nameController.text}\nEmail: ${emailController.text}\nTéléphone: ${phoneController.text}\n\nCV: ${selectedCV ?? 'Aucun CV'}\nLettre de motivation: ${selectedCoverLetter ?? 'Aucune lettre'}',
-      ),
+      path: widget.jobItem.applyLink, // Email du recruteur
+      queryParameters: {
+        'subject': 'Application pour le poste ${widget.jobItem.jobTitle}',
+        'body': '''
+Nom: ${nameController.text}
+Email: ${emailController.text}
+Téléphone: ${phoneController.text}
+
+CV: ${selectedCV ?? 'Aucun CV'}
+Lettre de motivation: ${selectedCoverLetter ?? 'Aucune lettre'}
+        '''
+            .trim(),
+      },
     );
 
-    // ignore: deprecated_member_use
-    if (await canLaunch(emailUri.toString())) {
-      // ignore: deprecated_member_use
-      await launch(emailUri.toString());
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Impossible d\'ouvrir l\'application mail')));
+        content: Text('Impossible d\'ouvrir l\'application mail'),
+      ));
     }
   }
 
@@ -200,7 +208,7 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
                 const SizedBox(height: 24),
                 Center(
                   child: CustomButton(
-                    text: 'Postuler',
+                    text: 'Envoyer la candidature',
                     onPressed:
                         _openEmailClient, // Ouvrir Gmail avec les champs pré-remplis
                     isLoading: false,

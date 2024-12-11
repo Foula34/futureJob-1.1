@@ -59,11 +59,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => const WelcomeScreen(),
-        '/login': (context) => const LoginScreen(), // Écran de connexion
+        '/login': (context) => const LoginScreen(), 
         '/profile': (context) => ProfileScreen(user: currentUser),
         '/welcome': (context) => const WelcomeScreen(),
         '/notification': (context) => const NotificationScreen(),
-        '/sign': (context) => const SignScreen(), // Inscription
+        '/sign': (context) => const SignScreen(), 
         '/setting': (context) => const SettingsScreen(),
         '/home': (context) => JobHomePage(user: currentUser),
         '/drawer': (context) => const DrawerWidget(),
