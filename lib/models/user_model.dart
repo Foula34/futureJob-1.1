@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class User {
+class CustumUser {
   // Informations de base
   final String id;
   String name;
@@ -23,7 +23,7 @@ class User {
   String profileImageUrl; // Ajout du champ pour la photo de profil
 
   // Constructeur
-  User({
+  CustumUser({
     required this.id,
     required this.name,
     required this.email,
@@ -40,9 +40,9 @@ class User {
   });
 
   // Méthode pour créer un utilisateur à partir de Firestore
-  factory User.fromFirestore(DocumentSnapshot doc) {
+  factory CustumUser.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
-    return User(
+    return CustumUser(
       id: doc.id,
       name: data['name'] ?? '',
       email: data['email'] ?? '',

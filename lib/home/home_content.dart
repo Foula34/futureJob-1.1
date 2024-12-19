@@ -1,32 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:future_job/models/job_item_model.dart';
+import 'package:future_job/models/user_model.dart';
 import 'package:future_job/services/jobs_service.dart';
 import 'package:future_job/widget/job_card.dart';
-import 'package:future_job/widget/job_post.dart';
 import 'package:future_job/widget/section_title.dart';
-import 'package:future_job/models/user_model.dart';
+import 'package:future_job/widget/job_post.dart';
 
-class HomeContent extends StatefulWidget {
-  final User user;
+class HomeContent extends StatelessWidget {
+  final CustumUser user; // Assurez-vous que le type est CustomUser
+  final JobsService jobsService;
 
-  const HomeContent({super.key, required this.user});
-
-  @override
-  State<HomeContent> createState() => _HomeContentState();
-}
-
-class _HomeContentState extends State<HomeContent> {
-  late Future<List<JobItem>> _jobsFuture;
-  late Future<List<JobItem>> _recommendedJobsFuture;
-  late Future<List<JobItem>> _newJobsFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _jobsFuture = JobsService().fetchJobs(); // Section jobs populaires
-    _recommendedJobsFuture = JobsService().fetchJobs(); // Recommandé pour vous
-    _newJobsFuture = JobsService().fetchJobs(); // Nouvelles offres
-  }
+  HomeContent({required this.user, required this.jobsService});
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +22,10 @@ class _HomeContentState extends State<HomeContent> {
           const SectionTitle(title: 'Jobs populaires'),
           const SizedBox(height: 10),
 
-          // FutureBuilder pour afficher les jobs populaires
-          FutureBuilder<List<JobItem>>(
-            future: _jobsFuture,
+          // StreamBuilder pour afficher les jobs populaires (favoris uniquement)
+          StreamBuilder<List<JobItem>>(
+            stream: jobsService
+                .getFavoriteJobsStream(), // Filtrage des emplois favoris dans le service
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -81,9 +66,10 @@ class _HomeContentState extends State<HomeContent> {
           const SectionTitle(title: 'Recommandé pour vous'),
           const SizedBox(height: 10),
 
-          // FutureBuilder pour afficher les emplois recommandés
-          FutureBuilder<List<JobItem>>(
-            future: _recommendedJobsFuture,
+          // StreamBuilder pour afficher les emplois recommandés
+          StreamBuilder<List<JobItem>>(
+            stream: jobsService.getRecommendedJobsStream(
+                user), // Passer le user de type CustomUser
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -124,9 +110,10 @@ class _HomeContentState extends State<HomeContent> {
           const SectionTitle(title: 'Nouvelles offres'),
           const SizedBox(height: 10),
 
-          // FutureBuilder pour afficher les nouvelles offres avec JobPost
-          FutureBuilder<List<JobItem>>(
-            future: _newJobsFuture,
+          // StreamBuilder pour afficher les nouvelles offres
+          StreamBuilder<List<JobItem>>(
+            stream: jobsService
+                .getAllJobsStream(), // Tous les emplois, y compris ceux non favoris
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

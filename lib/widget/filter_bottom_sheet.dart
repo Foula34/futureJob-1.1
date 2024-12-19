@@ -3,11 +3,12 @@ import 'package:future_job/home/home_content.dart';
 import 'package:future_job/home/job_ask.dart';
 import 'package:future_job/home/notification_screen.dart';
 import 'package:future_job/models/user_model.dart';
+import 'package:future_job/services/jobs_service.dart';
 import 'package:future_job/widget/appbar.dart';
 import 'package:future_job/widget/drawer.dart';
 
 class JobHomePage extends StatefulWidget {
-  final User user; // Ajoutez cette ligne pour inclure l'utilisateur
+  final CustumUser user; // Ajoutez cette ligne pour inclure l'utilisateur
 
   const JobHomePage(
       {super.key, required this.user}); // Modifiez le constructeur
@@ -26,7 +27,10 @@ class _JobHomePageState extends State<JobHomePage> {
   void initState() {
     super.initState();
     // Initialiser la liste des pages avec l'utilisateur
-    _pages.add(HomeContent(user: widget.user));
+    _pages.add(HomeContent(
+      user: widget.user,
+      jobsService: JobsService(),
+    ));
     _pages.add(const NotificationScreen());
     _pages.add(const JobAsk());
   }

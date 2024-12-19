@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:future_job/authentication/profile_screen.dart';
-import 'package:future_job/models/user_model.dart';
+import 'package:future_job/models/user_model.dart'; // Assurez-vous que vous avez bien importé votre modèle User
 
-AppBar buildAppBar(int currentIndex, BuildContext context, User user) {
+AppBar buildAppBar(int currentIndex, BuildContext context, CustumUser user) {
   switch (currentIndex) {
     case 0:
       return AppBar(
@@ -13,12 +13,15 @@ AppBar buildAppBar(int currentIndex, BuildContext context, User user) {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => ProfileScreen(user: user)),
+                MaterialPageRoute(builder: (context) => ProfileScreen()),
               );
             },
-            child: const CircleAvatar(
-              backgroundImage: AssetImage('assets/images/me.jpg'),
+            child: CircleAvatar(
+              backgroundColor: Colors.blueAccent, // Couleur de fond
+              child: Text(
+                user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -51,24 +54,6 @@ AppBar buildAppBar(int currentIndex, BuildContext context, User user) {
         ),
         backgroundColor: Colors.white,
       );
-    // case 3:
-    //   return AppBar(
-    //     centerTitle: true,
-    //     leading: IconButton(
-    //       onPressed: () {
-    //         Navigator.pushNamed(context, '/home');
-    //       },
-    //       icon: const Icon(Icons.arrow_back_ios),
-    //     ),
-    //     title: Text(
-    //       'Emplois postulé',
-    //       style: GoogleFonts.roboto(
-    //         fontSize: 24.0,
-    //         fontWeight: FontWeight.bold,
-    //       ),
-    //     ),
-    //     backgroundColor: Colors.white,
-    //   );
     default:
       return AppBar();
   }

@@ -1,25 +1,19 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:future_job/home/settings_screen.dart';
+import 'package:future_job/authentication/edit_profile_screen.dart';
+import 'package:future_job/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:io';
-
-import '../../models/user_model.dart';
-import '../../services/auth_service.dart'; // Assurez-vous que le chemin d'importation est correct.
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key, required User user});
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  User? _currentUser;
+  final AuthService _authService = AuthService();
   Map<String, dynamic>? _userData;
-  File? _image;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -28,63 +22,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    try {
-      // Récupérer les données de l'utilisateur actif via AuthService
-      Map<String, dynamic>? userData = await AuthService().getUserData();
+    setState(() {
+      _isLoading = true;
+    });
 
-      if (userData != null) {
+    try {
+      final data = await _authService.getUserData();
+      if (data != null) {
         setState(() {
-          _userData = userData;
-          _currentUser = AuthService().getCurrentUser() as User?;
+          _userData = data;
         });
       }
     } catch (e) {
       print('Erreur lors de la récupération des données utilisateur: $e');
-    }
-  }
-
-  Future<void> _pickImage() async {
-    // Utilisation de file_picker pour le web
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.image);
-
-    if (result != null) {
+    } finally {
       setState(() {
-        _image = File(result.files.single.path!);
+        _isLoading = false;
       });
-
-      try {
-        String fileName = DateTime.now()
-            .millisecondsSinceEpoch
-            .toString(); // Utiliser le timestamp pour nommer l'image
-        Reference storageRef =
-            FirebaseStorage.instance.ref().child('profile_images/$fileName');
-
-        UploadTask uploadTask = storageRef.putFile(_image!);
-        TaskSnapshot taskSnapshot = await uploadTask;
-
-        String imageUrl = await taskSnapshot.ref.getDownloadURL();
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(_currentUser!.id)
-            .update({
-          'profileImageUrl': imageUrl,
-        });
-
-        setState(() {
-          _userData!['profileImageUrl'] = imageUrl;
-        });
-      } catch (e) {
-        print('Erreur lors du téléchargement de l\'image: $e');
-      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     if (_userData == null) {
-      return Center(child: CircularProgressIndicator());
+      return Scaffold(
+        body: Center(
+          child: Text(
+            "Aucune donnée utilisateur disponible.",
+            style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
@@ -114,8 +88,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               _buildProfileHeader(),
               const SizedBox(height: 24),
-              _buildQuickActions(),
-              const SizedBox(height: 24),
               _buildUserInfo(),
               const SizedBox(height: 24),
               _buildEditProfileButton(),
@@ -129,19 +101,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileHeader() {
     return Column(
       children: [
-        _image == null
-            ? CircleAvatar(
-                radius: 50,
-                backgroundImage: NetworkImage(
-                    _userData!['profileImageUrl'].isNotEmpty
-                        ? _userData!['profileImageUrl']
-                        : 'https://example.com/default-profile-image.jpg'),
-              )
-            : CircleAvatar(
-                radius: 50,
-                backgroundImage: FileImage(_image!),
-              ),
-        const SizedBox(height: 16),
         Text(
           _userData!['name'],
           style: GoogleFonts.roboto(
@@ -149,44 +108,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          _userData!['preferredJobType'],
+          _userData!['preferredJobType'] ?? "Type de travail non défini",
           style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey[600]),
         ),
-        const SizedBox(height: 16),
-        ElevatedButton.icon(
-          onPressed: _pickImage,
-          icon: Icon(Icons.camera_alt),
-          label: Text("Changer la photo"),
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: Colors.blue,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
       ],
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildActionButton(
-            Icons.email, () => {/* Action pour envoyer un email */}),
-        _buildActionButton(Icons.phone, () => {/* Action pour appeler */}),
-        _buildActionButton(
-            Icons.star, () => {/* Action pour ajouter aux favoris */}),
-        _buildActionButton(Icons.share, () => {/* Action pour partager */}),
-      ],
-    );
-  }
-
-  Widget _buildActionButton(IconData icon, VoidCallback onPressed) {
-    return IconButton(
-      icon: Icon(icon, color: Colors.blue),
-      onPressed: onPressed,
-      tooltip: 'Action ${icon.toString()}',
     );
   }
 
@@ -210,9 +135,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           _buildListTile('Email', _userData!['email']),
           _buildListTile(
-              'Type de travail préféré', _userData!['preferredJobType']),
-          _buildListTile('Secteur préféré', _userData!['preferredIndustry']),
-          _buildListTile('Emplacement', _userData!['preferredLocation']),
+              'Type de travail préféré', _userData!['preferredJobType'] ?? ''),
+          _buildListTile(
+              'Secteur préféré', _userData!['preferredIndustry'] ?? ''),
+          _buildListTile('Emplacement', _userData!['preferredLocation'] ?? ''),
         ],
       ),
     );
@@ -229,12 +155,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildEditProfileButton() {
     return ElevatedButton(
-      onPressed: () {
-        // Action pour éditer le profil
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => SettingsScreen()));
+      onPressed: () async {
+        // Naviguer vers l'écran d'édition et attendre la mise à jour
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+        );
+
+        // Recharger les données après modification
+        _loadUserData();
       },
-      child: Text("Modifier le profil"),
+      child: const Text("Modifier le profil"),
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
         backgroundColor: Colors.blue,

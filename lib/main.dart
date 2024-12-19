@@ -35,10 +35,10 @@ class MyApp extends StatelessWidget {
       salary: '2000 €',
       location: 'Conakry, Guinée',
       jobDescription: 'Développer des applications Flutter...',
-      applyLink: 'recrutement@techcorp.com', // Lien email pour postuler
+      applyLink: 'recrutement@techcorp.com', id: '', // Lien email pour postuler
     );
 
-    User currentUser = User(
+    CustumUser currentUser = CustumUser(
       name: 'Foula Fofana',
       email: 'fofanafoula70@gmail.com',
       phoneNumber: '+224 624366897',
@@ -59,11 +59,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => const WelcomeScreen(),
-        '/login': (context) => const LoginScreen(), 
-        '/profile': (context) => ProfileScreen(user: currentUser),
+        '/login': (context) => const LoginScreen(),
+        '/profile': (context) => ProfileScreen(),
         '/welcome': (context) => const WelcomeScreen(),
         '/notification': (context) => const NotificationScreen(),
-        '/sign': (context) => const SignScreen(), 
+        '/sign': (context) => const SignScreen(),
         '/setting': (context) => const SettingsScreen(),
         '/home': (context) => JobHomePage(user: currentUser),
         '/drawer': (context) => const DrawerWidget(),
