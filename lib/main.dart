@@ -46,6 +46,7 @@ class MyApp extends StatelessWidget {
       status: 'En attente',
       applyLink: 'recrutement@techcorp.com',
       jobId: '',
+      userId: 'abc123',
     );
 
     CustumUser currentUser = CustumUser(

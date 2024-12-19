@@ -10,6 +10,8 @@ class JobItem {
   final List<String> requirements;
   final String employmentType;
   final String applyLink;
+  final List<Map<String, dynamic>>
+      applications; // Nouvelle propriété pour les candidatures
 
   JobItem({
     required this.id,
@@ -23,6 +25,7 @@ class JobItem {
     this.employmentType = 'Temps Plein',
     this.applyLink = 'fofanafoula70@gmail.com',
     List<String>? requirements,
+    required this.applications, // Champ applications ajouté
   }) : requirements = requirements ?? [];
 
   // Factory pour faciliter la conversion depuis Firestore
@@ -39,6 +42,8 @@ class JobItem {
       employmentType: data['employmentType'] ?? 'Temps Plein',
       applyLink: data['applyLink'] ?? 'fofanafoula70@gmail.com',
       requirements: List<String>.from(data['requirements'] ?? []),
+      applications: List<Map<String, dynamic>>.from(
+          data['applications'] ?? []), // Récupérer les candidatures
     );
   }
 

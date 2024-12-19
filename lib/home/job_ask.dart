@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:future_job/services/job_ask_service.dart';
 import 'package:future_job/models/job_ask_model.dart'; // Modèle mis à jour
+import 'package:firebase_auth/firebase_auth.dart'; // Pour récupérer l'ID de l'utilisateur connecté
 
 class JobAsk extends StatefulWidget {
   const JobAsk({super.key});
@@ -12,26 +13,32 @@ class JobAsk extends StatefulWidget {
 class _JobAskState extends State<JobAsk> {
   final JobAskService _jobAskService = JobAskService(); // Instance du service
   List<JobAskModel> jobApplications = [];
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
-    // Charger les demandes d'emploi depuis Firestore
     _loadJobApplications();
   }
 
   // Fonction pour charger les demandes d'emploi depuis Firestore
-/*************  ✨ Codeium Command ⭐  *************/
-  /// Charge les demandes d'emploi depuis Firestore et met à jour l'état
-  /// de la liste des demandes d'emploi.
-  ///
-  /// Appelée dans [initState] pour charger les demandes d'emploi
-  /// lors de l'initialisation du widget.
-/******  1e9ec632-e212-4834-b3f3-d68bee5b7019  *******/ void
-      _loadJobApplications() async {
+  void _loadJobApplications() async {
+    // Récupérer l'ID de l'utilisateur connecté
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      currentUserId = user.uid; // Stocker l'ID de l'utilisateur connecté
+    }
+
+    // Récupérer toutes les candidatures
     List<JobAskModel> jobs = await _jobAskService.getJobApplications();
+
+    // Filtrer les candidatures dont l'userId correspond à celui de l'utilisateur connecté
+    List<JobAskModel> filteredJobs =
+        jobs.where((job) => job.userId == currentUserId).toList();
+
     setState(() {
-      jobApplications = jobs;
+      jobApplications =
+          filteredJobs; // Mettre à jour l'état avec les candidatures filtrées
     });
   }
 
@@ -141,16 +148,9 @@ class _JobAskState extends State<JobAsk> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
                         ),
-                        // onPressed: () {
-                        //   // Mettre à jour le statut si nécessaire
-                        //   // Exemple de mise à jour du statut
-                        //   _jobAskService.updateJobStatus(
-                        //     job.jobId, // Remplacer par l'ID du document
-                        //     'Accepté', // Nouveau statut
-                        //   );
-
-                        // },
-                        onPressed: () {},
+                        onPressed: () {
+                          // Action pour afficher les détails de la demande
+                        },
                         child: const Text(
                           'Détails',
                           style: TextStyle(color: Colors.white),

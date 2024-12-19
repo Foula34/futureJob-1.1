@@ -4,6 +4,7 @@ class JobAskModel {
   final String status;
   final String applyLink;
   final String jobId;
+  final String userId;
 
   JobAskModel({
     required this.title,
@@ -11,16 +12,30 @@ class JobAskModel {
     required this.status,
     required this.applyLink,
     required this.jobId,
+    required this.userId,
   });
 
-  // Conversion d'un document Firestore en JobAskModel
-  factory JobAskModel.fromFirestore(Map<String, dynamic> data) {
+  // Convertir les données Firestore en modèle
+  factory JobAskModel.fromFirestore(Map<String, dynamic> firestoreData) {
     return JobAskModel(
-      title: data['title'],
-      date: data['date'],
-      status: data['status'],
-      applyLink: data['applyLink'],
-      jobId: data['jobId'],
+      title: firestoreData['title'] ?? '',
+      date: firestoreData['date'] ?? '',
+      status: firestoreData['status'] ?? '',
+      applyLink: firestoreData['applyLink'] ?? '',
+      jobId: firestoreData['jobId'] ?? '',
+      userId: firestoreData['userId'] ?? '',
     );
+  }
+
+  // Convertir le modèle en Map pour l'ajout dans Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'date': date,
+      'status': status,
+      'applyLink': applyLink,
+      'jobId': jobId,
+      'userId': userId,
+    };
   }
 }

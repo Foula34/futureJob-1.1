@@ -14,19 +14,7 @@ class JobsService {
           .snapshots()
           .map((snapshot) {
         return snapshot.docs.map((doc) {
-          return JobItem(
-            id: doc.id,
-            companyLogo: doc['companyLogo'] ?? '',
-            jobTitle: doc['jobTitle'] ?? '',
-            companyName: doc['companyName'] ?? '',
-            employmentType: doc['employmentType'] ?? '',
-            salary: doc['salary'] ?? '',
-            location: doc['location'] ?? '',
-            applyLink: doc['applyLink'] ?? '',
-            isFavorite: doc['isFavorite'] ?? false,
-            jobDescription: doc['jobDescription'] ?? '',
-            requirements: List<String>.from(doc['requirements'] ?? []),
-          );
+          return _mapJobWithApplications(doc);
         }).toList();
       });
     } catch (e) {
@@ -40,19 +28,7 @@ class JobsService {
     try {
       return _firestore.collection('jobs').snapshots().map((snapshot) {
         return snapshot.docs.map((doc) {
-          return JobItem(
-            id: doc.id,
-            companyLogo: doc['companyLogo'] ?? '',
-            jobTitle: doc['jobTitle'] ?? '',
-            companyName: doc['companyName'] ?? '',
-            employmentType: doc['employmentType'] ?? '',
-            salary: doc['salary'] ?? '',
-            location: doc['location'] ?? '',
-            applyLink: doc['applyLink'] ?? '',
-            isFavorite: doc['isFavorite'] ?? false,
-            jobDescription: doc['jobDescription'] ?? '',
-            requirements: List<String>.from(doc['requirements'] ?? []),
-          );
+          return _mapJobWithApplications(doc);
         }).toList();
       });
     } catch (e) {
@@ -63,7 +39,6 @@ class JobsService {
 
   // Récupérer les emplois recommandés en fonction des préférences de l'utilisateur
   Stream<List<JobItem>> getRecommendedJobsStream(CustumUser customUser) {
-    // Changez User en CustomUser ici
     try {
       return _firestore
           .collection('users')
@@ -95,19 +70,7 @@ class JobsService {
           // Retourner les résultats filtrés
           var snapshot = await query.get();
           return snapshot.docs.map((doc) {
-            return JobItem(
-              id: doc.id,
-              companyLogo: doc['companyLogo'] ?? '',
-              jobTitle: doc['jobTitle'] ?? '',
-              companyName: doc['companyName'] ?? '',
-              employmentType: doc['employmentType'] ?? '',
-              salary: doc['salary'] ?? '',
-              location: doc['location'] ?? '',
-              applyLink: doc['applyLink'] ?? '',
-              isFavorite: doc['isFavorite'] ?? false,
-              jobDescription: doc['jobDescription'] ?? '',
-              requirements: List<String>.from(doc['requirements'] ?? []),
-            );
+            return _mapJobWithApplications(doc);
           }).toList();
         }
         return []; // Si aucun utilisateur n'est trouvé, retourner une liste vide
@@ -127,6 +90,67 @@ class JobsService {
     } catch (e) {
       print('Erreur lors de la mise à jour du statut favori: $e');
       rethrow; // Relance l'erreur pour la capturer dans l'appelant
+    }
+  }
+
+  // Méthode pour mapper un job avec ses candidatures
+  JobItem _mapJobWithApplications(DocumentSnapshot doc) {
+    var data = doc.data() as Map<String, dynamic>;
+
+    // Récupérer les applications
+    List<Map<String, dynamic>> applications =
+        List<Map<String, dynamic>>.from(data['applications'] ?? []);
+
+    return JobItem(
+      id: doc.id,
+      companyLogo: data['companyLogo'] ?? '',
+      jobTitle: data['jobTitle'] ?? '',
+      companyName: data['companyName'] ?? '',
+      employmentType: data['employmentType'] ?? '',
+      salary: data['salary'] ?? '',
+      location: data['location'] ?? '',
+      applyLink: data['applyLink'] ?? '',
+      isFavorite: data['isFavorite'] ?? false,
+      jobDescription: data['jobDescription'] ?? '',
+      requirements: List<String>.from(data['requirements'] ?? []),
+      applications: applications, // Ajouter les applications récupérées
+    );
+  }
+
+  // Récupérer les candidatures d'un emploi spécifique
+  Future<List<Map<String, dynamic>>> getJobApplications(String jobId) async {
+    try {
+      // Récupérer le document de l'emploi avec l'ID spécifié
+      DocumentSnapshot jobDoc =
+          await _firestore.collection('jobs').doc(jobId).get();
+
+      if (jobDoc.exists) {
+        // Récupérer les applications du champ "applications" du document
+        var data = jobDoc.data() as Map<String, dynamic>;
+        List<Map<String, dynamic>> applications =
+            List<Map<String, dynamic>>.from(data['applications'] ?? []);
+        return applications; // Retourner la liste des candidatures
+      } else {
+        print('Emploi non trouvé');
+        return []; // Si l'emploi n'existe pas, retourner une liste vide
+      }
+    } catch (e) {
+      print('Erreur lors de la récupération des candidatures: $e');
+      return []; // Renvoie une liste vide en cas d'erreur
+    }
+  }
+
+  // Mettre à jour les candidatures d'un emploi spécifique
+  Future<void> updateJobApplications(
+      String jobId, List<Map<String, dynamic>> applications) async {
+    try {
+      // Mettre à jour le champ 'applications' dans le document de l'emploi
+      await _firestore.collection('jobs').doc(jobId).update({
+        'applications': applications, // Mettre à jour la liste des candidatures
+      });
+    } catch (e) {
+      print('Erreur lors de la mise à jour des candidatures: $e');
+      rethrow; // Relance l'erreur pour pouvoir la capturer plus haut dans la pile d'appels
     }
   }
 }
