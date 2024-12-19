@@ -49,7 +49,9 @@ AppBar buildAppBar(int currentIndex, BuildContext context, CustumUser user) {
           ),
         ],
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, '/home');
+          },
           icon: const Icon(Icons.arrow_back_ios),
         ),
         backgroundColor: Colors.white,

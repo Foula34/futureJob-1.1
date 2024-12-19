@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:future_job/authentication/edit_profile_screen.dart';
 import 'package:future_job/authentication/profile_screen.dart';
 import 'package:future_job/authentication/signin.dart';
 import 'package:future_job/authentication/signup.dart';
@@ -9,6 +10,7 @@ import 'package:future_job/home/job_detail_screen.dart';
 import 'package:future_job/home/notification_screen.dart';
 import 'package:future_job/home/settings_screen.dart';
 import 'package:future_job/home/subscribe_job_screen.dart';
+import 'package:future_job/models/job_ask_model.dart';
 import 'package:future_job/models/job_item_model.dart';
 import 'package:future_job/models/user_model.dart';
 import 'package:future_job/widget/drawer.dart';
@@ -28,14 +30,22 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Exemple d'objet JobItem
-    JobItem jobItem = JobItem(
-      jobTitle: 'Développeur Flutter',
-      companyLogo: 'https://example.com/logo.png',
-      companyName: 'TechCorp',
-      salary: '2000 €',
-      location: 'Conakry, Guinée',
-      jobDescription: 'Développer des applications Flutter...',
-      applyLink: 'recrutement@techcorp.com', id: '', // Lien email pour postuler
+    // JobItem jobItems = JobItem(
+    //   jobTitle: 'Développeur Flutter',
+    //   companyLogo: 'https://example.com/logo.png',
+    //   companyName: 'TechCorp',
+    //   salary: '2000 €',
+    //   location: 'Conakry, Guinée',
+    //   jobDescription: 'Développer des applications Flutter...',
+    //   applyLink: 'recrutement@techcorp.com',
+    //   id: '', // Lien email pour postuler
+    // );
+    JobAskModel jobItem = JobAskModel(
+      title: 'Développeur Flutter',
+      date: '2023-07-01',
+      status: 'En attente',
+      applyLink: 'recrutement@techcorp.com',
+      jobId: '',
     );
 
     CustumUser currentUser = CustumUser(
@@ -66,6 +76,7 @@ class MyApp extends StatelessWidget {
         '/sign': (context) => const SignScreen(),
         '/setting': (context) => const SettingsScreen(),
         '/home': (context) => JobHomePage(user: currentUser),
+        '/editprofile': (context) => const EditProfileScreen(),
         '/drawer': (context) => const DrawerWidget(),
         '/details': (context) {
           final JobItem jobItem =
@@ -73,7 +84,8 @@ class MyApp extends StatelessWidget {
           return JobDetailsPage(jobItem: jobItem);
         },
         '/subscribe': (context) {
-          return JobApplicationPage(jobItem: jobItem); // Passage de jobItem
+          // Passage de jobItem dans le contexte de la route
+          return JobApplicationPage(jobItem: jobItem);
         },
       },
     );

@@ -31,7 +31,6 @@ class _DrawerWidgetState extends State<DrawerWidget> {
         setState(() {
           username = userData['name'] ?? '';
           email = userData['email'] ?? '';
-          profileImageUrl = userData['profileImageUrl'] ?? '';
         });
       }
     } catch (e) {
@@ -48,21 +47,6 @@ class _DrawerWidgetState extends State<DrawerWidget> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            // Image de profil ou une image par défaut si l'URL est vide
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: NetworkImage(profileImageUrl.isEmpty
-                      ? 'assets/images/default_profile.jpg' // Image par défaut
-                      : profileImageUrl),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16.0),
             // Affichage du nom de l'utilisateur
             Text(
               username.isEmpty ? 'Nom d\'utilisateur' : username,

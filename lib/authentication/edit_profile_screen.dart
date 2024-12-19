@@ -83,48 +83,85 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Modifier le profil"),
+        centerTitle: true,
+        title: Text(
+          "Modifier le profil",
+          style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.blue.shade700,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: [
-              TextFormField(
+              _buildTextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: "Nom complet"),
+                label: "Nom complet",
+                icon: Icons.person,
                 validator: (value) =>
                     value!.isEmpty ? "Ce champ est requis" : null,
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              _buildTextField(
                 controller: _preferredJobTypeController,
-                decoration:
-                    const InputDecoration(labelText: "Type de travail préféré"),
+                label: "Type de travail préféré",
+                icon: Icons.work,
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              _buildTextField(
                 controller: _preferredIndustryController,
-                decoration: const InputDecoration(labelText: "Secteur préféré"),
+                label: "Secteur préféré",
+                icon: Icons.business,
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              _buildTextField(
                 controller: _preferredLocationController,
-                decoration:
-                    const InputDecoration(labelText: "Emplacement préféré"),
+                label: "Emplacement préféré",
+                icon: Icons.location_on,
               ),
               const SizedBox(height: 24),
               _isLoading
-                  ? const CircularProgressIndicator()
+                  ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: _saveProfile,
                       child: const Text("Enregistrer"),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blue.shade700,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        textStyle: GoogleFonts.roboto(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.roboto(color: Colors.grey[600]),
+        prefixIcon: Icon(icon, color: Colors.blue.shade700),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue.shade700),
+        ),
+        border: OutlineInputBorder(),
+      ),
+      validator: validator,
     );
   }
 }

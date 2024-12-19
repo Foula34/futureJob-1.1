@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:future_job/services/job_ask_service.dart';
+import 'package:future_job/models/job_ask_model.dart'; // Modèle mis à jour
 
 class JobAsk extends StatefulWidget {
   const JobAsk({super.key});
@@ -8,43 +10,56 @@ class JobAsk extends StatefulWidget {
 }
 
 class _JobAskState extends State<JobAsk> {
-  final List<Map<String, dynamic>> jobs = [
-    {'title': 'Développeur Flutter', 'date': '2024-10-01', 'status': 'Accepté'},
-    {'title': 'Ingénieur DevOps', 'date': '2024-09-28', 'status': 'En attente'},
-    {'title': 'Analyste Sécurité', 'date': '2024-09-20', 'status': 'Refusé'},
-    {'title': 'Chef de Projet IT', 'date': '2024-09-15', 'status': 'Accepté'},
-  ];
+  final JobAskService _jobAskService = JobAskService(); // Instance du service
+  List<JobAskModel> jobApplications = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Charger les demandes d'emploi depuis Firestore
+    _loadJobApplications();
+  }
+
+  // Fonction pour charger les demandes d'emploi depuis Firestore
+/*************  ✨ Codeium Command ⭐  *************/
+  /// Charge les demandes d'emploi depuis Firestore et met à jour l'état
+  /// de la liste des demandes d'emploi.
+  ///
+  /// Appelée dans [initState] pour charger les demandes d'emploi
+  /// lors de l'initialisation du widget.
+/******  1e9ec632-e212-4834-b3f3-d68bee5b7019  *******/ void
+      _loadJobApplications() async {
+    List<JobAskModel> jobs = await _jobAskService.getJobApplications();
+    setState(() {
+      jobApplications = jobs;
+    });
+  }
 
   // Mapping des états aux couleurs et icônes
   Color getStatusColor(String status) {
     switch (status) {
       case 'Accepté':
-        return Colors.green; // Couleur pour l'état Accepté
+        return Colors.green;
       case 'En attente':
-        return Colors.orange; // Couleur pour l'état En attente
+        return Colors.orange;
       case 'Refusé':
-        return Colors.red; // Couleur pour l'état Refusé
+        return Colors.red;
       default:
-        return Colors.grey; // Couleur par défaut
+        return Colors.grey;
     }
   }
 
   IconData getStatusIcon(String status) {
     switch (status) {
       case 'Accepté':
-        return Icons.check_circle; // Icône pour Accepté
+        return Icons.check_circle;
       case 'En attente':
-        return Icons.hourglass_empty; // Icône pour En attente
+        return Icons.hourglass_empty;
       case 'Refusé':
-        return Icons.cancel; // Icône pour Refusé
+        return Icons.cancel;
       default:
-        return Icons.help; // Icône par défaut
+        return Icons.help;
     }
-  }
-
-  bool isDatePassed(String date) {
-    final jobDate = DateTime.parse(date);
-    return jobDate.isBefore(DateTime.now());
   }
 
   @override
@@ -56,14 +71,14 @@ class _JobAskState extends State<JobAsk> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20), // Espacement entre le titre et la liste
+            const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                itemCount: jobs.length,
+                itemCount: jobApplications.length,
                 itemBuilder: (context, index) {
-                  isDatePassed(jobs[index]['date']);
-                  final statusColor = getStatusColor(jobs[index]['status']);
-                  final statusIcon = getStatusIcon(jobs[index]['status']);
+                  final job = jobApplications[index];
+                  final statusColor = getStatusColor(job.status);
+                  final statusIcon = getStatusIcon(job.status);
 
                   return Card(
                     elevation: 3,
@@ -73,15 +88,15 @@ class _JobAskState extends State<JobAsk> {
                     ),
                     child: ListTile(
                       leading: const Icon(
-                        Icons.business_center, // Icône pour le type de travail
+                        Icons.business_center,
                         color: Colors.blueAccent,
-                        size: 40, // Augmenter la taille de l'icône
+                        size: 40,
                       ),
                       title: Text(
-                        jobs[index]['title']!,
+                        job.title,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18, // Taille de police augmentée
+                          fontSize: 18,
                         ),
                       ),
                       subtitle: Column(
@@ -95,25 +110,22 @@ class _JobAskState extends State<JobAsk> {
                                 color: Colors.grey,
                               ),
                               const SizedBox(width: 4),
-                              Text('Postulé le: ${jobs[index]['date']}'),
+                              Text('Postulé le: ${job.date}'),
                             ],
                           ),
                           Row(
                             children: [
                               Icon(
-                                statusIcon, // Icône pour l'état
+                                statusIcon,
                                 size: 16,
-                                color:
-                                    statusColor, // Couleur en fonction de l'état
+                                color: statusColor,
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'État: ${jobs[index]['status']}',
+                                'État: ${job.status}',
                                 style: TextStyle(
-                                  color:
-                                      statusColor, // Couleur en fonction de l'état
-                                  fontWeight: FontWeight
-                                      .bold, // Mise en gras pour l'état
+                                  color: statusColor,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
@@ -129,11 +141,19 @@ class _JobAskState extends State<JobAsk> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
                         ),
+                        // onPressed: () {
+                        //   // Mettre à jour le statut si nécessaire
+                        //   // Exemple de mise à jour du statut
+                        //   _jobAskService.updateJobStatus(
+                        //     job.jobId, // Remplacer par l'ID du document
+                        //     'Accepté', // Nouveau statut
+                        //   );
+
+                        // },
                         onPressed: () {},
                         child: const Text(
                           'Détails',
-                          style: TextStyle(
-                              color: Colors.white), // Couleur du texte
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ),

@@ -41,4 +41,6 @@ class JobItem {
       requirements: List<String>.from(data['requirements'] ?? []),
     );
   }
+
+  get jobId => null;
 }

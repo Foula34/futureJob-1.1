@@ -77,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushNamed(context, '/home'),
         ),
       ),
       body: SingleChildScrollView(
@@ -133,23 +133,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildListTile('Email', _userData!['email']),
-          _buildListTile(
-              'Type de travail préféré', _userData!['preferredJobType'] ?? ''),
-          _buildListTile(
-              'Secteur préféré', _userData!['preferredIndustry'] ?? ''),
-          _buildListTile('Emplacement', _userData!['preferredLocation'] ?? ''),
+          _buildListTile('Email', _userData!['email'], Icons.email),
+          const Divider(color: Colors.grey, height: 1),
+          _buildListTile('Type de travail préféré',
+              _userData!['preferredJobType'] ?? '', Icons.work),
+          const Divider(color: Colors.grey, height: 1),
+          _buildListTile('Secteur préféré',
+              _userData!['preferredIndustry'] ?? '', Icons.business),
+          const Divider(color: Colors.grey, height: 1),
+          _buildListTile('Emplacement', _userData!['preferredLocation'] ?? '',
+              Icons.location_on),
         ],
       ),
     );
   }
 
-  Widget _buildListTile(String title, String subtitle) {
+  Widget _buildListTile(String title, String subtitle, IconData icon) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title:
           Text(title, style: GoogleFonts.roboto(fontWeight: FontWeight.bold)),
       subtitle: Text(subtitle, style: GoogleFonts.roboto(color: Colors.grey)),
+      leading: Icon(icon,
+          color:
+              Colors.blue.shade700), // Icône spécifique pour chaque information
     );
   }
 
@@ -170,6 +177,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         foregroundColor: Colors.white,
         backgroundColor: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+        textStyle:
+            GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 16),
       ),
     );
   }

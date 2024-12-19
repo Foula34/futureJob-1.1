@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:future_job/models/job_item_model.dart';
-import 'package:future_job/widget/custom_button.dart';
+import 'package:future_job/services/job_ask_service.dart';
+import 'package:future_job/models/job_ask_model.dart'; // Modèle mis à jour
+import 'package:url_launcher/url_launcher.dart'; // Pour ouvrir l'email
 
 class JobApplicationPage extends StatefulWidget {
-  final JobItem jobItem; // JobItem en paramètre
+  final JobAskModel jobItem;
 
   const JobApplicationPage({super.key, required this.jobItem});
 
   @override
-  _JobApplicationPageState createState() => _JobApplicationPageState();
+  State<JobApplicationPage> createState() => _JobApplicationPageState();
 }
 
 class _JobApplicationPageState extends State<JobApplicationPage> {
@@ -24,6 +24,9 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
   // Variables pour stocker les fichiers choisis
   String? selectedCV;
   String? selectedCoverLetter;
+
+  // Instance du service JobAskService pour ajouter une candidature
+  final JobAskService _jobAskService = JobAskService();
 
   // Fonction pour choisir un fichier (CV)
   Future<void> pickCV() async {
@@ -53,13 +56,33 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
     }
   }
 
+  // Fonction pour envoyer la candidature et mettre à jour la collection "jobask"
+  void _sendJobApplication() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      // Créer un modèle de demande d'emploi
+      JobAskModel jobAsk = JobAskModel(
+        title: widget.jobItem.title,
+        date: DateTime.now().toString(),
+        status: 'En attente',
+        applyLink: widget.jobItem.applyLink,
+        jobId: widget.jobItem.jobId,
+      );
+
+      // Ajouter la demande d'emploi à Firestore
+      await _jobAskService.addJobApplication(jobAsk);
+
+      // Ouvrir le client mail après l'ajout
+      _openEmailClient();
+    }
+  }
+
   // Fonction pour ouvrir l'email avec les champs pré-remplis
   void _openEmailClient() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
       path: widget.jobItem.applyLink, // Email du recruteur
       queryParameters: {
-        'subject': 'Application pour le poste ${widget.jobItem.jobTitle}',
+        'subject': 'Application pour le poste ${widget.jobItem.title}',
         'body': '''
 Nom: ${nameController.text}
 Email: ${emailController.text}
@@ -88,7 +111,7 @@ Lettre de motivation: ${selectedCoverLetter ?? 'Aucune lettre'}
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushNamed(context, '/home');
           },
         ),
         title: const Text('Postuler pour le poste'),
@@ -166,10 +189,9 @@ Lettre de motivation: ${selectedCoverLetter ?? 'Aucune lettre'}
                 ),
                 Row(
                   children: [
-                    CustomButton(
-                      text: 'Choisir un fichier',
+                    ElevatedButton(
                       onPressed: pickCV,
-                      isLoading: false,
+                      child: const Text('Choisir un fichier'),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -189,10 +211,9 @@ Lettre de motivation: ${selectedCoverLetter ?? 'Aucune lettre'}
                 ),
                 Row(
                   children: [
-                    CustomButton(
-                      text: 'Choisir un fichier',
+                    ElevatedButton(
                       onPressed: pickCoverLetter,
-                      isLoading: false,
+                      child: const Text('Choisir un fichier'),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -207,11 +228,9 @@ Lettre de motivation: ${selectedCoverLetter ?? 'Aucune lettre'}
                 ),
                 const SizedBox(height: 24),
                 Center(
-                  child: CustomButton(
-                    text: 'Envoyer la candidature',
-                    onPressed:
-                        _openEmailClient, // Ouvrir Gmail avec les champs pré-remplis
-                    isLoading: false,
+                  child: ElevatedButton(
+                    onPressed: _sendJobApplication, // Envoie la candidature
+                    child: const Text('Envoyer la candidature'),
                   ),
                 ),
               ],
